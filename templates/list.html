@@ -14,12 +14,18 @@
       h1 {
         text-align: center;
         margin-top: 2rem;
+        letter-spacing: 2px;
         margin-bottom: 3.5rem;
+      }
+      h1 a {
+        color: #333;
+        text-decoration: none;
       }
       .list-wrapper {
         width: 80%;
         margin: 0 auto;
         position: relative;
+        margin-bottom: 40px;
         box-shadow: 0 0 32px 0 rgba(0, 0, 0, 0.1);
       }
       .list-container {
@@ -53,6 +59,12 @@
         font-weight: 400;
         color: #000000;
         background-color: #f7f7f9;
+      }
+      .list-container .list-header-container h3 a {
+        cursor: pointer;
+      }
+      .list-container .list-header-container h3 a:hover {
+        color: #2eb5ef;
       }
       .list-body-container {
         position: relative;
@@ -95,7 +107,9 @@
   </head>
 
   <body>
-    <h1>OneList</h1>
+    <h1>
+      <a href="/">OneList</a>
+    </h1>
 
     <div class="list-wrapper">
       <div class="list-container">
@@ -137,12 +151,28 @@
       </div>
     </div>
   </body>
-  <script src="https://unpkg.com/ionicons@4.4.4/dist/ionicons.js"></script>
   <script>
     function back() {
       location.href =
         '/{{ path }}'.replace('//', '/').replace(/\/$/, '') + '/../'
     }
+
+    document.querySelectorAll('.list-header-container h3').forEach(function(e) {
+      var path = e.innerText.replace(/^\/|\/$/g, '')
+      if (path.includes('/')) {
+        e.innerHTML = ''
+      } else {
+        return
+      }
+
+      path = path.split('/')
+      for (var i = 0; i < path.length; i++) {
+        var to = path.slice(0, i + 1).join('/')
+        e.innerHTML += '<a jump-to="/' + to + '">' + path[i] + '</a> / '
+      }
+
+      e.innerHTML = e.innerHTML.replace(/\s\/\s$/, '')
+    })
 
     document.querySelectorAll('[jump-to]').forEach(function(e) {
       e.addEventListener('click', function() {
@@ -150,4 +180,5 @@
       })
     })
   </script>
+  <script src="https://unpkg.com/ionicons@4.4.4/dist/ionicons.js"></script>
 </html>
