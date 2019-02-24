@@ -1,6 +1,7 @@
 from onedrive import OneDrive
 from flask import Flask, redirect, render_template
 from datetime import datetime
+from dateutil import tz
 
 app = Flask(__name__)
 
@@ -36,7 +37,7 @@ def catch_all(path):
 # Filters
 @app.template_filter('date_format')
 def date_format(str, format='%Y/%m/%d %H:%M:%S'):
-    return datetime.datetime.strptime(str, "%Y-%m-%dT%H:%M:%SZ").strftime(format)
+    return datetime.strptime(str, "%Y-%m-%dT%H:%M:%SZ").strftime(format).replace(tzinfo=tz.tzutc()).astimezone(tz.gettz('Asia/Shanghai')).strftime(format)
 
 
 @app.template_filter('file_size')
