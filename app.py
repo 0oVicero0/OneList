@@ -41,7 +41,7 @@ def catch_all(path):
 # Filters
 @app.template_filter('date_format')
 def date_format(str, format='%Y/%m/%d %H:%M:%S'):
-    return datetime.strptime(str, "%Y-%m-%dT%H:%M:%SZ").strftime(format).replace(tzinfo=tz.tzutc()).astimezone(tz.gettz('Asia/Shanghai')).strftime(format)
+    return datetime.strptime(str, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=tz.tzutc()).astimezone(tz.gettz('Asia/Shanghai')).strftime(format)
 
 
 @app.template_filter('file_size')
