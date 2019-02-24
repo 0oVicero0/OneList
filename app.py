@@ -24,20 +24,22 @@ def catch_all(path):
             file_name = file_name[len(path):]
         file_name = file_name.strip('/')
 
-        print(file_name)
         if '/' in file_name:
             dirs[file_name[:file_name.index('/')]] = v
         else:
             files[file_name] = v
 
-    return render_template('list.html', path=path, dirs=dirs, files=files, format=format)
+    return render_template('list.html', path=path, dirs=dirs, files=files)
 
 
 # Filters
 @app.template_filter('date_format')
 def date_format(str, format='%Y-%m-%d %H:%M:%S'):
-    import datetime
-    return datetime.datetime.strptime(str, "%Y-%m-%dT%H:%M:%S%z").strftime(format)
+    from dateutil import tz
+    from datetime import datetime
+
+    dt = datetime.strptime(str, "%Y-%m-%dT%H:%M:%S%z")
+    return dt.replace(tzinfo=tz.tzutc()).astimezone(tz.tzlocal()).strftime(format)
 
 
 @app.template_filter('file_size')
