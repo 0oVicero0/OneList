@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <meta charset="UTF-8" />
+    <title>OneList</title>
+    <style>
+      body {
+        font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        font-size: 14px;
+        line-height: 1em;
+        background-color: #f7f7f9;
+        color: #000000;
+      }
+      h1 {
+        text-align: center;
+        margin-top: 2rem;
+        margin-bottom: 3.5rem;
+      }
+      .list-wrapper {
+        width: 80%;
+        margin: 0 auto;
+        position: relative;
+        box-shadow: 0 0 32px 0 rgba(0, 0, 0, 0.1);
+      }
+      .list-container {
+        position: relative;
+        overflow: hidden;
+      }
+      .list-container .list-header-container {
+        position: relative;
+      }
+      .list-container .list-header-container a.back-link {
+        color: #000000;
+        display: inline-block;
+        position: absolute;
+        font-size: 16px;
+        padding: 30px 20px;
+        vertical-align: middle;
+        text-decoration: none;
+      }
+      body
+        .list-wrapper
+        .list-container
+        .list-header-container
+        a.back-link:hover {
+        color: #2eb5ef;
+      }
+      .list-container .list-header-container h3 {
+        margin: 0;
+        border: 0 none;
+        padding: 30px 20px;
+        text-align: center;
+        font-weight: 400;
+        color: #000000;
+        background-color: #f7f7f9;
+      }
+      .list-body-container {
+        position: relative;
+        left: 0;
+        overflow-x: hidden;
+        overflow-y: auto;
+        box-sizing: border-box;
+        background: white;
+      }
+      .list-body-container .list-table {
+        width: 100%;
+        padding: 20px;
+        border-spacing: 0;
+      }
+      .list-body-container .list-table tr {
+        height: 40px;
+        cursor: pointer;
+      }
+      .list-body-container .list-table tr:hover {
+        background: #f1f1f1;
+      }
+      .list-body-container .list-table tr:first-child {
+        background: white;
+      }
+      .list-body-container .list-table th,
+      .list-body-container .list-table td {
+        padding: 0 10px;
+        text-align: left;
+      }
+      .list-body-container .list-table .updated_at,
+      .list-body-container .list-table .size {
+        text-align: right;
+      }
+      .list-body-container .list-table .file ion-icon {
+        font-size: 15px;
+        margin-right: 5px;
+        vertical-align: bottom;
+      }
+    </style>
+  </head>
+
+  <body>
+    <h1>OneList</h1>
+
+    <div class="list-wrapper">
+      <div class="list-container">
+        <div class="list-header-container">
+          <a href="javascript:back()" class="back-link">
+            <ion-icon name="arrow-back"></ion-icon>
+          </a>
+          <h3>{{ path or '根目录' }}</h3>
+        </div>
+        <div class="list-body-container">
+          <table class="list-table">
+            <tr>
+              <th class="file">文件</th>
+              <th class="updated_at">修改时间</th>
+              <th class="size">大小</th>
+            </tr>
+            <!-- Dirs -->
+            {% for k,v in dirs.items() %}
+            <tr jump-to="/{{ path }}/{{ k }}">
+              <td class="file"><ion-icon name="folder"></ion-icon> {{ k }}</td>
+              <td class="updated_at">
+                {{ v.time | date_format }}
+              </td>
+              <td class="size">{{ v.size | file_size }}</td>
+            </tr>
+            {% endfor %}
+            <!-- Files -->
+            {% for k,v in files.items() %}
+            <tr jump-to="/{{ path }}/{{ k }}">
+              <td class="file">
+                <ion-icon name="document"></ion-icon> {{ k }}
+              </td>
+              <td class="updated_at">{{ v.time | date_format }}</td>
+              <td class="size">{{ v.size | file_size }}</td>
+            </tr>
+            {% endfor %}
+          </table>
+        </div>
+      </div>
+    </div>
+  </body>
+  <script src="https://unpkg.com/ionicons@4.4.4/dist/ionicons.js"></script>
+  <script>
+    function back() {
+      location.href =
+        '/{{ path }}'.replace('//', '/').replace(/\/$/, '') + '/../'
+    }
+
+    document.querySelectorAll('[jump-to]').forEach(function(e) {
+      e.addEventListener('click', function() {
+        location.href = this.getAttribute('jump-to').replace('//', '/')
+      })
+    })
+  </script>
+</html>
