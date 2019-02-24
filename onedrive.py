@@ -6,11 +6,12 @@ from cache import Cache
 from urllib import request, parse
 import json
 
+# Get refresh_token.
+# https://login.microsoftonline.com/common/oauth2/authorize?response_type=code&client_id=ea2b36f6-b8ad-40be-bc0f-e5e4a4a7d4fa&redirect_uri=http://localhost/onedrive-login
 
-class OneDrive():
+class onedrive():
     def __init__(self):
-        self.Header = {'User-Agent': 'ISV|MoeClub|MoeClub/1.0',
-                       'Content-Type': 'application/x-www-form-urlencoded', 'Accept': 'application/json; odata.metadata=none'}
+        self.Header = {'User-Agent': 'ISV|MoeClub|OneList/1.0', 'Content-Type': 'application/x-www-form-urlencoded', 'Accept': 'application/json; odata.metadata=none'}
         self.refresh_token = ''
         self.expires = None
         self.api_url = None
@@ -32,8 +33,7 @@ class OneDrive():
         Data = parse.urlencode(access_dict).encode('utf-8')
         Header = self.Header
         try:
-            req_context = request.urlopen(request.Request(str(
-                api_auth_url), method='POST', headers=Header, data=Data)).read().decode('utf-8')
+            req_context = request.urlopen(request.Request(str(api_auth_url), method='POST', headers=Header, data=Data)).read().decode('utf-8')
             req_dict = json.loads(req_context)
             self.expires = req_dict["expires_on"]
             self.access = req_dict["access_token"]
@@ -44,11 +44,9 @@ class OneDrive():
 
     def get_src(self):
         self.get_access()
-        if not self.access:
-            print("Unauthorized")
-            exit(1)
-        URL = "https://api.office.com/discovery/v2.0/me/services"
+        self.check_access()
         try:
+            URL = "https://api.office.com/discovery/v2.0/me/services"
             req_src_context = self.req_item(URL)
             req_src_context_dict = json.loads(req_src_context)
             for item in req_src_context_dict['value']:
@@ -63,23 +61,17 @@ class OneDrive():
 
     def check_access(self):
         if not self.access:
-            self.get_src()
-            if not self.access:
-                print("Unauthorized")
-                exit(1)
+            print("Unauthorized")
+            exit(1)
 
-    def req_item(self, URL, Data=None, Method='GET'):
+    def req_item(self, URL, Method='GET'):
         self.check_access()
         Header = self.Header
         Header['Authorization'] = "Bearer " + self.access
-        if Data:
-            Data = parse.urlencode(Data).encode('utf-8')
-        return request.urlopen(request.Request(str(URL), data=Data, headers=Header, method=Method)).read().decode('utf-8')
+        return request.urlopen(request.Request(str(URL), headers=Header, method=Method)).read().decode('utf-8')
 
     def list_item(self, Header, item_path):
-        item_url = self.api_url + '/drive/root:/' + \
-            parse.quote(str(
-                item_path)) + '?expand=children(select=lastModifiedDateTime,size,name,folder,file)'
+        item_url = self.api_url + '/drive/root:/' + parse.quote(str(item_path)) + '?expand=children(select=lastModifiedDateTime,size,name,folder,file)'
         return json.loads(request.urlopen(request.Request(str(item_url), headers=Header, method='GET')).read().decode('utf-8'))
 
     def list_items(self, Header, item_path=''):
@@ -88,11 +80,9 @@ class OneDrive():
             item_list = item_dict['children']
             for item_list_child in item_list:
                 if 'folder' in item_list_child:
-                    self.list_items(Header, item_path + '/' +
-                                    item_list_child['name'])
+                    self.list_items(Header, item_path + '/' + item_list_child['name'])
                 elif 'file' in item_list_child:
-                    self.item_all_path.append(
-                        item_path + '/' + item_list_child['name'])
+                    self.item_all_path.append(item_path + '/' + item_list_child['name'])
         elif '@content.downloadUrl' in item_dict:
             self.item_all_path.append(item_path)
             self.item_all[item_path] = {
@@ -111,6 +101,7 @@ class OneDrive():
 
         self.get_src()
         self.get_access(self.src_id)
+        self.check_access()
         Header = self.Header
         Header['Authorization'] = "Bearer " + self.access
         self.list_items(Header, item_path)
@@ -120,3 +111,4 @@ class OneDrive():
             self.list_items(Header, item)
 
         Cache.set(item_path, (self.item_all, self.item_all_path))
+
