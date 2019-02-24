@@ -115,12 +115,10 @@ class OneDrive():
 
     def _load_config(self):
         try:
-            with open('config.json', 'r') as c:
-                conf = json.loads(c.read())
-
-                if 'token' in conf:
-                    self.refresh_token = conf['token']
-
-        except Exception as e:
+            fd = open('config.json', 'r', encoding='utf-8')
+            conf = json.loads(fd.read())
+            fd.close()
+            if 'token' in conf:
+                self.refresh_token = conf['token']
+        except Exception:
             pass
-
