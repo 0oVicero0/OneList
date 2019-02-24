@@ -2,12 +2,15 @@
 # -*- encoding: utf-8 -*-
 # Author:  MoeClub.org
 
+from cache import Cache
 from urllib import request, parse
 import json
 
-class onedrive():
+
+class OneDrive():
     def __init__(self):
-        self.Header = {'User-Agent': 'ISV|MoeClub|MoeClub/1.0', 'Content-Type': 'application/x-www-form-urlencoded', 'Accept': 'application/json; odata.metadata=none'}
+        self.Header = {'User-Agent': 'ISV|MoeClub|MoeClub/1.0',
+                       'Content-Type': 'application/x-www-form-urlencoded', 'Accept': 'application/json; odata.metadata=none'}
         self.refresh_token = ''
         self.expires = None
         self.api_url = None
@@ -29,7 +32,8 @@ class onedrive():
         Data = parse.urlencode(access_dict).encode('utf-8')
         Header = self.Header
         try:
-            req_context = request.urlopen(request.Request(str(api_auth_url), method='POST', headers=Header, data=Data)).read().decode('utf-8')
+            req_context = request.urlopen(request.Request(str(
+                api_auth_url), method='POST', headers=Header, data=Data)).read().decode('utf-8')
             req_dict = json.loads(req_context)
             self.expires = req_dict["expires_on"]
             self.access = req_dict["access_token"]
@@ -73,7 +77,9 @@ class onedrive():
         return request.urlopen(request.Request(str(URL), data=Data, headers=Header, method=Method)).read().decode('utf-8')
 
     def list_item(self, Header, item_path):
-        item_url = self.api_url + '/drive/root:/' + parse.quote(str(item_path)) + '?expand=children(select=lastModifiedDateTime,size,name,folder,file)'
+        item_url = self.api_url + '/drive/root:/' + \
+            parse.quote(str(
+                item_path)) + '?expand=children(select=lastModifiedDateTime,size,name,folder,file)'
         return json.loads(request.urlopen(request.Request(str(item_url), headers=Header, method='GET')).read().decode('utf-8'))
 
     def list_items(self, Header, item_path=''):
@@ -82,9 +88,11 @@ class onedrive():
             item_list = item_dict['children']
             for item_list_child in item_list:
                 if 'folder' in item_list_child:
-                    self.list_items(Header, item_path + '/' + item_list_child['name'])
+                    self.list_items(Header, item_path + '/' +
+                                    item_list_child['name'])
                 elif 'file' in item_list_child:
-                    self.item_all_path.append(item_path + '/' + item_list_child['name'])
+                    self.item_all_path.append(
+                        item_path + '/' + item_list_child['name'])
         elif '@content.downloadUrl' in item_dict:
             self.item_all_path.append(item_path)
             self.item_all[item_path] = {
@@ -96,6 +104,11 @@ class onedrive():
             }
 
     def cache_list(self, item_path=''):
+        item_path = item_path.strip('/')
+        if Cache.has(item_path):
+            self.item_all, self.item_all_path = Cache.get(item_path)
+            return
+
         self.get_src()
         self.get_access(self.src_id)
         Header = self.Header
@@ -106,9 +119,4 @@ class onedrive():
                 continue
             self.list_items(Header, item)
 
-
-item = 'STORAGE/IMAGE'
-o365 = onedrive()
-o365.cache_list(item)
-print(o365.item_all)
-print(o365.item_all_path)
+        Cache.set(item_path, (self.item_all, self.item_all_path))
