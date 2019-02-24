@@ -116,8 +116,10 @@
             {% for k,v in dirs.items() %}
             <tr jump-to="/{{ path }}/{{ k }}">
               <td class="file"><ion-icon name="folder"></ion-icon> {{ k }}</td>
-              <td class="updated_at">2018-11-18 20:51:53</td>
-              <td class="size">1.9GB</td>
+              <td class="updated_at">
+                {{ v.time | date_format }}
+              </td>
+              <td class="size">{{ v.size | file_size }}</td>
             </tr>
             {% endfor %}
             <!-- Files -->
@@ -126,8 +128,8 @@
               <td class="file">
                 <ion-icon name="document"></ion-icon> {{ k }}
               </td>
-              <td class="updated_at">2018-11-18 20:51:53</td>
-              <td class="size">1.9GB</td>
+              <td class="updated_at">{{ v.time | date_format }}</td>
+              <td class="size">{{ v.size | file_size }}</td>
             </tr>
             {% endfor %}
           </table>
