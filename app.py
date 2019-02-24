@@ -1,3 +1,7 @@
+#!/usr/bin/env python3
+# -*- encoding: utf-8 -*-
+# Author:  MoeClub.org, sxyazi
+
 from onedrive import OneDrive
 from flask import Flask, redirect, render_template
 from datetime import datetime
