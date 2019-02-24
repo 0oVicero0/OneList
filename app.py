@@ -24,13 +24,12 @@ def catch_all(path):
             file_name = file_name[len(path):]
         file_name = file_name.strip('/')
 
-        print(file_name)
         if '/' in file_name:
             dirs[file_name[:file_name.index('/')]] = v
         else:
             files[file_name] = v
 
-    return render_template('list.html', path=path, dirs=dirs, files=files, format=format)
+    return render_template('list.html', path=path, dirs=dirs, files=files)
 
 
 # Filters

@@ -19,6 +19,7 @@ class OneDrive():
         self.src_id = None
         self.item_all = {}
         self.item_all_path = []
+        self._load_config()
 
     def get_access(self, resource='https://api.office.com/discovery/'):
         api_auth_url = "https://login.microsoftonline.com/common/oauth2/token"
@@ -111,4 +112,15 @@ class OneDrive():
             self.list_items(Header, item)
 
         Cache.set(item_path, (self.item_all, self.item_all_path))
+
+    def _load_config(self):
+        try:
+            with open('config.json', 'r') as c:
+                conf = json.loads(c.read())
+
+                if 'token' in conf:
+                    self.refresh_token = conf['token']
+
+        except Exception as e:
+            pass
 
