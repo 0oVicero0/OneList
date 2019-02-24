@@ -1,8 +1,11 @@
+#!/usr/bin/env python3
+# -*- encoding: utf-8 -*-
+# Author:  MoeClub.org
+
 import redis
 import pickle
 import hashlib
 r = redis.Redis(host='127.0.0.1', port=6379, db=0)
-
 
 class Cache:
     CACHED_SECONDS = 3000
