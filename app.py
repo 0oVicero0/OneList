@@ -15,27 +15,36 @@ app = Flask(__name__)
 @app.route('/<path:path>')
 def catch_all(path):
     one = OneDrive()
-    one.cache_list(path)
 
-    # file
-    if (len(one.item_all) == 1 and list(one.item_all)[0] == path):
-        return redirect(one.item_all[path]['url'])
+    one.get_access()
+    one.get_resource()
+    one.get_access(one.resource_id)
 
-    # dir
-    dirs, files = {}, {}
-    for k, v in one.item_all.items():
-        file_name = k
+    one.list_all_items('/')
+    print(one.all_files)
+    print(one.all_folders)
 
-        if file_name[:len(path)] == path:
-            file_name = file_name[len(path):]
-        file_name = file_name.strip('/')
+    return 'ok'
 
-        if '/' in file_name:
-            dirs[file_name[:file_name.index('/')]] = v
-        else:
-            files[file_name] = v
+    # # file
+    # if (len(one.all_files) == 1 and list(one.all_files)[0] == path):
+    #     return redirect(one.all_files[path]['url'])
 
-    return render_template('list.html', path=path, dirs=dirs, files=files)
+    # # dir
+    # dirs, files = {}, {}
+    # for k, v in one.all_files.items():
+    #     file_name = k
+
+    #     if file_name[:len(path)] == path:
+    #         file_name = file_name[len(path):]
+    #     file_name = file_name.strip('/')
+
+    #     if '/' in file_name:
+    #         dirs[file_name[:file_name.index('/')]] = v
+    #     else:
+    #         files[file_name] = v
+
+    # return render_template('list.html', path=path, dirs=dirs, files=files)
 
 
 # Filters
