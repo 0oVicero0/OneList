@@ -117,7 +117,7 @@
           <a href="javascript:back()" class="back-link">
             <ion-icon name="arrow-back"></ion-icon>
           </a>
-          <h3>{{ path or '根目录' }}</h3>
+          <h3>{{ path }}</h3>
         </div>
         <div class="list-body-container">
           <table class="list-table">
@@ -127,22 +127,22 @@
               <th class="size">大小</th>
             </tr>
             <!-- Dirs -->
-            {% for k,v in dirs.items() %}
-            <tr jump-to="/{{ path }}/{{ k }}">
-              <td class="file"><ion-icon name="folder"></ion-icon> {{ k }}</td>
-              <td class="updated_at">
-                {{ v.time | date_format }}
+            {% for v in info.folders[1:] %}
+            <tr jump-to="{{ v.full_path }}">
+              <td class="file">
+                <ion-icon name="folder"></ion-icon> {{ v.name }}
               </td>
+              <td class="updated_at">{{ v.updated_at | date_format }}</td>
               <td class="size">{{ v.size | file_size }}</td>
             </tr>
             {% endfor %}
             <!-- Files -->
-            {% for k,v in files.items() %}
-            <tr jump-to="/{{ path }}/{{ k }}">
+            {% for v in info.files %}
+            <tr jump-to="{{ v.full_path }}">
               <td class="file">
-                <ion-icon name="document"></ion-icon> {{ k }}
+                <ion-icon name="document"></ion-icon> {{ v.name }}
               </td>
-              <td class="updated_at">{{ v.time | date_format }}</td>
+              <td class="updated_at">{{ v.updated_at | date_format }}</td>
               <td class="size">{{ v.size | file_size }}</td>
             </tr>
             {% endfor %}

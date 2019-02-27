@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-# -*- encoding: utf-8 -*-
 # Author:  MoeClub.org, sxyazi
 
 import redis
@@ -11,7 +9,7 @@ r = redis.Redis(host='127.0.0.1', port=6379, db=0)
 
 
 class Cache:
-    CACHED_SECONDS = 3000
+    CACHED_SECONDS = 300
 
     @classmethod
     def get(cls, path):

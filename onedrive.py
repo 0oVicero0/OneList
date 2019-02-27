@@ -1,124 +1,135 @@
-#!/usr/bin/env python3
-# -*- encoding: utf-8 -*-
 # Author:  MoeClub.org, sxyazi
 
 from cache import Cache
+from utils import path_format
 from urllib import request, parse
 import json
+import requests
 
-# Get refresh_token.
-# https://login.microsoftonline.com/common/oauth2/authorize?response_type=code&client_id=ea2b36f6-b8ad-40be-bc0f-e5e4a4a7d4fa&redirect_uri=http://localhost/onedrive-login
 
 class OneDrive():
+    _request_headers = {'User-Agent': 'ISV|MoeClub|OneList/1.0',
+                        'Accept': 'application/json; odata.metadata=none'}
+
+    class ItemInfo:
+        def __init__(self):
+            self.files = []
+            self.folders = []
+
     def __init__(self):
-        self.Header = {'User-Agent': 'ISV|MoeClub|OneList/1.0', 'Content-Type': 'application/x-www-form-urlencoded', 'Accept': 'application/json; odata.metadata=none'}
+        self.api_url = ''
+        self.resource_id = ''
+
+        self.expires_on = ''
+        self.access_token = ''
         self.refresh_token = ''
-        self.expires = None
-        self.api_url = None
-        self.access = None
-        self.src_id = None
-        self.item_all = {}
-        self.item_all_path = []
         self._load_config()
 
     def get_access(self, resource='https://api.office.com/discovery/'):
-        api_auth_url = "https://login.microsoftonline.com/common/oauth2/token"
-        access_dict = {
-            'client_id': "ea2b36f6-b8ad-40be-bc0f-e5e4a4a7d4fa",
-            'client_secret': "h27zG8pr8BNsLU0JbBh5AOznNS5Of5Y540l/koc7048=",
-            'redirect_uri': "http://localhost/onedrive-login",
+        res = self._http_request('https://login.microsoftonline.com/common/oauth2/token', 'POST', {
+            'client_id': 'ea2b36f6-b8ad-40be-bc0f-e5e4a4a7d4fa',
+            'client_secret': 'h27zG8pr8BNsLU0JbBh5AOznNS5Of5Y540l/koc7048=',
+            'redirect_uri': 'http://localhost/onedrive-login',
             'refresh_token': self.refresh_token,
-            'grant_type': "refresh_token",
+            'grant_type': 'refresh_token',
             'resource': resource
-        }
-        Data = parse.urlencode(access_dict).encode('utf-8')
-        Header = self.Header
-        try:
-            req_context = request.urlopen(request.Request(str(api_auth_url), method='POST', headers=Header, data=Data)).read().decode('utf-8')
-            req_dict = json.loads(req_context)
-            self.expires = req_dict["expires_on"]
-            self.access = req_dict["access_token"]
-            self.refresh_token = req_dict["refresh_token"]
-        except:
-            self.expires = None
-            self.access = None
+        })
 
-    def get_src(self):
-        self.get_access()
-        self.check_access()
-        try:
-            URL = "https://api.office.com/discovery/v2.0/me/services"
-            req_src_context = self.req_item(URL)
-            req_src_context_dict = json.loads(req_src_context)
-            for item in req_src_context_dict['value']:
-                if item['serviceApiVersion'] == 'v2.0':
-                    self.api_url = item['serviceEndpointUri']
-                    self.src_id = item['serviceResourceId']
-            if not self.api_url:
-                raise Exception
-        except:
-            self.api_url = None
-            self.src_id = None
+        self.expires_on = res['expires_on']
+        self.access_token = res['access_token']
+        self.refresh_token = res['refresh_token']
 
-    def check_access(self):
-        if not self.access:
-            print("Unauthorized")
+        if not self.access_token:
+            print('Unauthorized')
             exit(1)
 
-    def req_item(self, URL, Method='GET'):
-        self.check_access()
-        Header = self.Header
-        Header['Authorization'] = "Bearer " + self.access
-        return request.urlopen(request.Request(str(URL), headers=Header, method=Method)).read().decode('utf-8')
+    def get_resource(self):
+        res = self._http_request(
+            'https://api.office.com/discovery/v2.0/me/services')
 
-    def list_item(self, Header, item_path):
-        item_url = self.api_url + '/drive/root:/' + parse.quote(str(item_path)) + '?expand=children(select=lastModifiedDateTime,size,name,folder,file)'
-        return json.loads(request.urlopen(request.Request(str(item_url), headers=Header, method='GET')).read().decode('utf-8'))
+        for item in res['value']:
+            if item['serviceApiVersion'] == 'v2.0':
+                self.api_url = item['serviceEndpointUri']
+                self.resource_id = item['serviceResourceId']
 
-    def list_items(self, Header, item_path=''):
-        item_dict = self.list_item(Header, item_path)
-        if 'folder' in item_dict:
-            item_list = item_dict['children']
-            for item_list_child in item_list:
-                if 'folder' in item_list_child:
-                    self.list_items(Header, item_path + '/' + item_list_child['name'])
-                elif 'file' in item_list_child:
-                    self.item_all_path.append(item_path + '/' + item_list_child['name'])
-        elif '@content.downloadUrl' in item_dict:
-            self.item_all_path.append(item_path)
-            self.item_all[item_path] = {
-                'name': item_dict['name'],
-                'size': item_dict['size'],
-                'time': item_dict['lastModifiedDateTime'],
-                'url': item_dict['@content.downloadUrl'],
-                'web': item_dict['webUrl'],
-            }
+        if not self.api_url:
+            raise Exception('Failed to get api url')
 
-    def cache_list(self, item_path=''):
-        item_path = item_path.strip('/')
-        if Cache.has(item_path):
-            self.item_all, self.item_all_path = Cache.get(item_path)
-            return
+    def list_items(self, path='/'):
+        url = '%s/drive/root:%s/?expand=children(select=name,size,file,folder,parentReference,lastModifiedDateTime)' % (
+            self.api_url, parse.quote(path_format(path)))
+        res = self._http_request(url)
 
-        self.get_src()
-        self.get_access(self.src_id)
-        self.check_access()
-        Header = self.Header
-        Header['Authorization'] = "Bearer " + self.access
-        self.list_items(Header, item_path)
-        for item in self.item_all_path:
-            if item in self.item_all:
-                continue
-            self.list_items(Header, item)
+        info = self.ItemInfo()
+        self._append_item(info, res)
 
-        Cache.set(item_path, (self.item_all, self.item_all_path))
+        if 'children' in res:
+            for children in res['children']:
+                self._append_item(info, children)
+
+        return info
+
+    def list_all_items(self, path='/'):
+        ret = self.ItemInfo()
+        tasks = [{'full_path': path}]
+
+        while len(tasks) > 0:
+            c = tasks.pop(0)
+
+            tmp = self.list_items(c['full_path'])
+            tasks += tmp.folders[1:]
+
+            ret.files += tmp.files
+            ret.folders += tmp.folders[1:]
+
+        return ret
+
+    def list_cached_items(self, path='/'):
+        path = path_format(path)
+        if not Cache.has(path):
+            Cache.set(path, self.list_items(path))
+
+        return Cache.get(path)
 
     def _load_config(self):
         try:
-            fd = open('config.json', 'r', encoding='utf-8')
-            conf = json.loads(fd.read())
-            fd.close()
+            conf = {}
+            with open('config.json', 'r', encoding='utf-8') as f:
+                conf = json.loads(f.read())
+
             if 'token' in conf:
                 self.refresh_token = conf['token']
-        except Exception:
+        except:
             pass
+
+    def _http_request(self, url, method='GET', data={}, headers={}):
+        if method == 'GET':
+            fn = requests.get
+        else:
+            fn = requests.post
+
+        if self.access_token:
+            headers['Authorization'] = 'Bearer ' + self.access_token
+
+        return fn(url, data=data, headers={**self._request_headers, **headers}).json()
+
+    def _append_item(self, info, item):
+        if 'path' not in item['parentReference']:
+            path = item['name'] = '/'
+        else:
+            path = item['parentReference']['path'][12:] or '/'
+
+        dic = {
+            'name': item['name'],
+            'size': item['size'],
+            'folder': path,
+            'full_path': path_format(path + '/' + item['name']),
+            'updated_at': item['lastModifiedDateTime']
+        }
+        if '@content.downloadUrl' in item:
+            dic['download_url'] = item['@content.downloadUrl']
+
+        if 'file' in item:
+            info.files.append(dic)
+        else:
+            info.folders.append(dic)
