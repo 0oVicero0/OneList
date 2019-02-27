@@ -23,9 +23,6 @@ class OneDrive():
         self.expires_on = ''
         self.access_token = ''
         self.refresh_token = ''
-
-        self.all_files = []
-        self.all_folders = []
         self._load_config()
 
     def get_access(self, resource='https://api.office.com/discovery/'):
@@ -89,12 +86,10 @@ class OneDrive():
 
     def list_cached_items(self, path='/'):
         path = path_format(path)
-        if Cache.has(path):
-            self.all_files, self.all_folders = Cache.get(path)
-            return
+        if not Cache.has(path):
+            Cache.set(path, self.list_items(path))
 
-        self.list_items(path)
-        Cache.set(path, (self.all_files, self.all_folders))
+        return Cache.get(path)
 
     def _load_config(self):
         try:

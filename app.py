@@ -20,7 +20,7 @@ one.get_access(one.resource_id)
 @app.route('/', defaults={'path': '/'})
 @app.route('/<path:path>')
 def catch_all(path):
-    info = one.list_items(path)
+    info = one.list_cached_items(path)
 
     if info.files and not info.folders:  # download
         return redirect(info.files[0]['download_url'])
