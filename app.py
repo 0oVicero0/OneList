@@ -9,42 +9,23 @@ from dateutil import tz
 
 app = Flask(__name__)
 
+one = OneDrive()
+
+one.get_access()
+one.get_resource()
+one.get_access(one.resource_id)
+
 
 # Views
-@app.route('/', defaults={'path': ''})
+@app.route('/', defaults={'path': '/'})
 @app.route('/<path:path>')
 def catch_all(path):
-    one = OneDrive()
+    info = one.list_items(path)
 
-    one.get_access()
-    one.get_resource()
-    one.get_access(one.resource_id)
+    if info.files and not info.folders:  # download
+        return redirect(info.files[0]['download_url'])
 
-    one.list_all_items('/')
-    print(one.all_files)
-    print(one.all_folders)
-
-    return 'ok'
-
-    # # file
-    # if (len(one.all_files) == 1 and list(one.all_files)[0] == path):
-    #     return redirect(one.all_files[path]['url'])
-
-    # # dir
-    # dirs, files = {}, {}
-    # for k, v in one.all_files.items():
-    #     file_name = k
-
-    #     if file_name[:len(path)] == path:
-    #         file_name = file_name[len(path):]
-    #     file_name = file_name.strip('/')
-
-    #     if '/' in file_name:
-    #         dirs[file_name[:file_name.index('/')]] = v
-    #     else:
-    #         files[file_name] = v
-
-    # return render_template('list.html', path=path, dirs=dirs, files=files)
+    return render_template('list.html', path=path, info=info)
 
 
 # Filters
