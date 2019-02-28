@@ -9,7 +9,7 @@ r = redis.Redis(host='127.0.0.1', port=6379, db=0)
 
 
 class Cache:
-    CACHED_SECONDS = 3000
+    CACHED_SECONDS = 18000
 
     @classmethod
     def get(cls, path):
@@ -22,8 +22,8 @@ class Cache:
         return r.exists(cls._get_key(path))
 
     @classmethod
-    def set(cls, path, entity):
-        return r.set(cls._get_key(path), pickle.dumps(entity), cls.CACHED_SECONDS)
+    def set(cls, path, entity, expire=CACHED_SECONDS):
+        return r.set(cls._get_key(path), pickle.dumps(entity), expire)
 
     @staticmethod
     def _get_key(path):
