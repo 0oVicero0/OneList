@@ -3,6 +3,7 @@
 # Author:  MoeClub.org, sxyazi
 
 from process import od
+from config import config
 from flask import Flask, redirect, render_template
 
 
@@ -10,7 +11,7 @@ app = Flask(__name__)
 
 
 # Views
-@app.route('/', defaults={'path': '/'})
+@app.route('/', defaults={'path': config.start_directory})
 @app.route('/<path:path>')
 def catch_all(path):
     info = od.list_items_with_cache(path)

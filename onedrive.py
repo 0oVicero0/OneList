@@ -93,7 +93,7 @@ class OneDrive():
 
         if not Cache.has(key):
             if flash:
-                Cache.set(key, self.list_items(path), 180)
+                Cache.set(key, self.list_items(path), 10)
             else:
                 print('missing: %s' % path)
                 Cache.set(key, self.list_items(path))

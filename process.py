@@ -2,6 +2,7 @@ import time
 import schedule
 import threading
 from cache import Cache
+from config import config
 from onedrive import OneDrive
 from utils import path_format
 
@@ -14,8 +15,8 @@ od.get_access(od.resource_id)
 
 
 class Process:
-    @classmethod
-    def runner(cls):
+    @staticmethod
+    def runner():
         while True:
             schedule.run_pending()
             time.sleep(1)
@@ -47,12 +48,12 @@ class Process:
                     cls.cache_all(new)
                     tasks += new.folders[1:]
 
-    @classmethod
-    def cache_all(cls, info):
+    @staticmethod
+    def cache_all(info):
         for f in info.folders:
             Cache.set(f['full_path'], od.list_items_with_cache(
                 f['full_path'], True))
 
 
 threading.Thread(target=Process.runner).start()
-schedule.every(5).minutes.do(Process.refreshes)
+schedule.every(config.refresh_seconds).seconds.do(Process.refreshes)
