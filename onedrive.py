@@ -1,10 +1,14 @@
 # Author:  MoeClub.org, sxyazi
 
+import json
+import pickle
+import hashlib
+import requests
+
 from cache import Cache
 from utils import path_format
-from urllib import request, parse
-import json
-import requests
+from config import config
+from urllib import parse
 
 
 class OneDrive():
@@ -22,8 +26,7 @@ class OneDrive():
 
         self.expires_on = ''
         self.access_token = ''
-        self.refresh_token = ''
-        self._load_config()
+        self.refresh_token = config.token
 
     def get_access(self, resource='https://api.office.com/discovery/'):
         res = self._http_request('https://login.microsoftonline.com/common/oauth2/token', 'POST', {
@@ -84,23 +87,18 @@ class OneDrive():
 
         return ret
 
-    def list_cached_items(self, path='/'):
+    def list_items_with_cache(self, path='/', flash=False):
         path = path_format(path)
-        if not Cache.has(path):
-            Cache.set(path, self.list_items(path))
+        key = ('tmp:' + path) if flash else path
 
-        return Cache.get(path)
+        if not Cache.has(key):
+            if flash:
+                Cache.set(key, self.list_items(path), 180)
+            else:
+                print('missing: %s' % path)
+                Cache.set(key, self.list_items(path))
 
-    def _load_config(self):
-        try:
-            conf = {}
-            with open('config.json', 'r', encoding='utf-8') as f:
-                conf = json.loads(f.read())
-
-            if 'token' in conf:
-                self.refresh_token = conf['token']
-        except:
-            pass
+        return Cache.get(key)
 
     def _http_request(self, url, method='GET', data={}, headers={}):
         if method == 'GET':
@@ -122,6 +120,7 @@ class OneDrive():
         dic = {
             'name': item['name'],
             'size': item['size'],
+            'hash': self._get_item_hash(item),
             'folder': path,
             'full_path': path_format(path + '/' + item['name']),
             'updated_at': item['lastModifiedDateTime']
@@ -133,3 +132,18 @@ class OneDrive():
             info.files.append(dic)
         else:
             info.folders.append(dic)
+
+    def _get_item_hash(self, item):
+        dic = {
+            'name': item['name'],
+            'size': item['size'],
+            'parentReference': item['parentReference'],
+            'lastModifiedDateTime': item['lastModifiedDateTime']
+        }
+
+        if 'file' in item:
+            dic['file'] = item['file']
+        else:
+            dic['folder'] = item['folder']
+
+        return hashlib.md5(pickle.dumps(dic)).hexdigest()

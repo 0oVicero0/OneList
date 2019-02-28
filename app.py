@@ -2,25 +2,18 @@
 # -*- encoding: utf-8 -*-
 # Author:  MoeClub.org, sxyazi
 
-from onedrive import OneDrive
+from process import od
 from flask import Flask, redirect, render_template
-from datetime import datetime
-from dateutil import tz
+
 
 app = Flask(__name__)
-
-one = OneDrive()
-
-one.get_access()
-one.get_resource()
-one.get_access(one.resource_id)
 
 
 # Views
 @app.route('/', defaults={'path': '/'})
 @app.route('/<path:path>')
 def catch_all(path):
-    info = one.list_cached_items(path)
+    info = od.list_items_with_cache(path)
 
     if info.files and not info.folders:  # download
         return redirect(info.files[0]['download_url'])
@@ -31,7 +24,11 @@ def catch_all(path):
 # Filters
 @app.template_filter('date_format')
 def date_format(str, format='%Y/%m/%d %H:%M:%S'):
-    return datetime.strptime(str, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=tz.tzutc()).astimezone(tz.gettz('Asia/Shanghai')).strftime(format)
+    from dateutil import tz
+    from datetime import datetime
+
+    dt = datetime.strptime(str, "%Y-%m-%dT%H:%M:%S%z")
+    return dt.replace(tzinfo=tz.tzutc()).astimezone(tz.gettz('Asia/Shanghai')).strftime(format)
 
 
 @app.template_filter('file_size')
