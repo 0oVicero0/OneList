@@ -4,13 +4,18 @@
 
 from process import od
 from config import config
-from flask import Flask, redirect, render_template
+from flask import Flask, abort, redirect, render_template
 
 
 app = Flask(__name__)
 
 
 # Views
+@app.route('/favicon.ico')
+def favicon():
+    return abort(404)
+
+
 @app.route('/', defaults={'path': config.start_directory})
 @app.route('/<path:path>')
 def catch_all(path):
@@ -28,7 +33,7 @@ def date_format(str, format='%Y/%m/%d %H:%M:%S'):
     from dateutil import tz
     from datetime import datetime
 
-    dt = datetime.strptime(str, "%Y-%m-%dT%H:%M:%S%z")
+    dt = datetime.strptime(str, "%Y-%m-%dT%H:%M:%SZ")
     return dt.replace(tzinfo=tz.tzutc()).astimezone(tz.gettz('Asia/Shanghai')).strftime(format)
 
 
