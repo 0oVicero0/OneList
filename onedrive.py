@@ -110,7 +110,10 @@ class OneDrive():
         if self.access_token:
             headers['Authorization'] = 'Bearer ' + self.access_token
 
-        return fn(url, data=data, headers=headers).json()
+        res = fn(url, data=data, headers=headers).json()
+        if 'error' in res:
+            raise Exception(res['error']['message'])
+        return res
 
     def _append_item(self, info, item):
         if 'path' not in item['parentReference']:
