@@ -28,7 +28,7 @@ def date_format(str, format='%Y/%m/%d %H:%M:%S'):
     from dateutil import tz
     from datetime import datetime
 
-    dt = datetime.strptime(str, "%Y-%m-%dT%H:%M:%S%Z")
+    dt = datetime.strptime(str, "%Y-%m-%dT%H:%M:%SZ")
     return dt.replace(tzinfo=tz.tzutc()).astimezone(tz.gettz('Asia/Shanghai')).strftime(format)
 
 
