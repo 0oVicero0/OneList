@@ -11,14 +11,15 @@ from config import config
 from urllib import parse
 
 
+class _ItemInfo:
+    def __init__(self):
+        self.files = []
+        self.folders = []
+
+
 class OneDrive():
     _request_headers = {'User-Agent': 'ISV|MoeClub|OneList/1.0',
                         'Accept': 'application/json; odata.metadata=none'}
-
-    class ItemInfo:
-        def __init__(self):
-            self.files = []
-            self.folders = []
 
     def __init__(self):
         self.api_url = ''
@@ -63,7 +64,7 @@ class OneDrive():
             self.api_url, parse.quote(path_format(path)))
         res = self._http_request(url)
 
-        info = self.ItemInfo()
+        info = _ItemInfo()
         self._append_item(info, res)
 
         if 'children' in res:
@@ -73,7 +74,7 @@ class OneDrive():
         return info
 
     def list_all_items(self, path='/'):
-        ret = self.ItemInfo()
+        ret = _ItemInfo()
         tasks = [{'full_path': path}]
 
         while len(tasks) > 0:

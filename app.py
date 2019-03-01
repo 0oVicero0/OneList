@@ -39,19 +39,19 @@ def date_format(str, format='%Y/%m/%d %H:%M:%S'):
 
 @app.template_filter('file_size')
 def file_size(size):
-    unit = {
-        'B': 2**0,
-        'KB': 2**10,
-        'MB': 2**20,
-        'GB': 2**30,
-        'TB': 2**40,
-        'PB': 2**50,
-        'EB': 2**60,
-        'ZB': 2**70,
-        'YB': 2**80,
-    }
+    unit = (
+        ('B', 2**0),
+        ('KB', 2**10),
+        ('MB', 2**20),
+        ('GB', 2**30),
+        ('TB', 2**40),
+        ('PB', 2**50),
+        ('EB', 2**60),
+        ('ZB', 2**70),
+        ('YB', 2**80)
+    )
 
-    for k, v in unit.items():
+    for k, v in unit:
         if size <= v * 1024:
             return '%s %s' % (round(size/v, 2), k)
     return 'unknown'
