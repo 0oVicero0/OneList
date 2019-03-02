@@ -7,7 +7,7 @@ git clone https://github.com/0oVicero0/OneList.git
 cd OneList
 
 pip3 install -r requirements.txt
-gunicorn app:app
+gunicorn app:app -b 127.0.0.1:5000 -D
 ```
 
 ## Configuration
