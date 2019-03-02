@@ -23,7 +23,7 @@ class Process:
 
     @classmethod
     def refreshes(cls):
-        tasks = [{'full_path': '/'}]
+        tasks = [{'full_path': config.start_directory}]
 
         while len(tasks) > 0:
             c = tasks.pop(0)
