@@ -24,7 +24,7 @@ class Process:
         od.get_access(od.resource_id)
 
     @classmethod
-    def refreshes(cls):
+    def refresh_folders(cls):
         tasks = [{'full_path': config.start_directory}]
 
         while len(tasks) > 0:
