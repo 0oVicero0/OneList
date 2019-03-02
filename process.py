@@ -9,10 +9,6 @@ from utils import path_format
 
 od = OneDrive()
 
-od.get_access()
-od.get_resource()
-od.get_access(od.resource_id)
-
 
 class Process:
     @staticmethod
@@ -21,8 +17,14 @@ class Process:
             schedule.run_pending()
             time.sleep(1)
 
+    @staticmethod
+    def refresh_token():
+        od.get_access()
+        od.get_resource()
+        od.get_access(od.resource_id)
+
     @classmethod
-    def refreshes(cls):
+    def refresh_folders(cls):
         tasks = [{'full_path': '/'}]
 
         while len(tasks) > 0:
@@ -55,5 +57,8 @@ class Process:
                 f['full_path'], True))
 
 
+Process.refresh_token()
 threading.Thread(target=Process.runner).start()
-schedule.every(config.refresh_seconds).seconds.do(Process.refreshes)
+
+schedule.every(2).hours.do(Process.refresh_token)
+schedule.every(config.refresh_seconds).seconds.do(Process.refresh_folders)
