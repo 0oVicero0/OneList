@@ -22,7 +22,7 @@ Create a config file named `config.json`
 {
   "token": "<secret>",
   "start_directory": "/",
-  "refresh_seconds": 60
+  "refresh_seconds": 300
 }
 ```
 
