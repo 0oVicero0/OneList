@@ -108,7 +108,7 @@
 
   <body>
     <h1>
-      <a href="/">OneList</a>
+      <a href="{{ url_for('.catch_all') }}">OneList</a>
     </h1>
 
     <div class="list-wrapper">
@@ -152,9 +152,11 @@
     </div>
   </body>
   <script>
+    const root = "{{ url_for('.catch_all') }}"
+
     function back() {
       location.href =
-        '/{{ path }}'.replace('//', '/').replace(/\/$/, '') + '/../'
+        root + '{{ path }}'.replace('//', '/').replace(/\/$/, '') + '/../'
     }
 
     document.querySelectorAll('.list-header-container h3').forEach(function(e) {
@@ -168,7 +170,7 @@
       path = path.split('/')
       for (var i = 0; i < path.length; i++) {
         var to = path.slice(0, i + 1).join('/')
-        e.innerHTML += '<a jump-to="/' + to + '">' + path[i] + '</a> / '
+        e.innerHTML += '<a jump-to="' + to + '">' + path[i] + '</a> / '
       }
 
       e.innerHTML = e.innerHTML.replace(/\s\/\s$/, '')
@@ -176,7 +178,7 @@
 
     document.querySelectorAll('[jump-to]').forEach(function(e) {
       e.addEventListener('click', function() {
-        location.href = this.getAttribute('jump-to').replace('//', '/')
+        location.href = (root + this.getAttribute('jump-to')).replace('//', '/')
       })
     })
   </script>

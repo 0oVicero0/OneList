@@ -4,20 +4,19 @@
 
 from process import od
 from config import config
-from flask import Flask, abort, redirect, render_template
+from flask import Flask, abort, redirect, render_template, Blueprint
 
-
-app = Flask(__name__)
+bp = Blueprint('main', __name__, url_prefix=config.location_path)
 
 
 # Views
-@app.route('/favicon.ico')
+@bp.route('/favicon.ico')
 def favicon():
     return abort(404)
 
 
-@app.route('/', defaults={'path': config.start_directory})
-@app.route('/<path:path>')
+@bp.route('/', defaults={'path': config.start_directory})
+@bp.route('/<path:path>')
 def catch_all(path):
     info = od.list_items_with_cache(path)
 
@@ -28,7 +27,7 @@ def catch_all(path):
 
 
 # Filters
-@app.template_filter('date_format')
+@bp.app_template_filter('date_format')
 def date_format(str, format='%Y/%m/%d %H:%M:%S'):
     from dateutil import tz
     from datetime import datetime
@@ -37,7 +36,7 @@ def date_format(str, format='%Y/%m/%d %H:%M:%S'):
     return dt.replace(tzinfo=tz.tzutc()).astimezone(tz.gettz('Asia/Shanghai')).strftime(format)
 
 
-@app.template_filter('file_size')
+@bp.app_template_filter('file_size')
 def file_size(size):
     unit = (
         ('B', 2**0),
@@ -56,6 +55,9 @@ def file_size(size):
             return '%s %s' % (round(size/v, 2), k)
     return 'unknown'
 
+
+app = Flask(__name__)
+app.register_blueprint(bp)
 
 if __name__ == '__main__':
     app.run(debug=True)
