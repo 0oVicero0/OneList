@@ -117,7 +117,7 @@
           <a href="javascript:back()" class="back-link">
             <ion-icon name="arrow-back"></ion-icon>
           </a>
-          <h3>{{ path }}</h3>
+          <h3>{{ path or '/' }}</h3>
         </div>
         <div class="list-body-container">
           <table class="list-table">
@@ -155,7 +155,9 @@
     const root = "{{ url_for('.catch_all') }}"
 
     function back() {
-      location.href = path_format(root + '{{ path }}/..')
+      if (root != location.pathname) {
+        location.href = path_format(root + '{{ path }}/..')
+      }
     }
 
     function path_format(path) {
