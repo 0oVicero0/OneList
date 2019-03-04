@@ -24,8 +24,8 @@ Create a config file named `config.json`
   "location_path": "/",
   "start_directory": "/",
   "refresh_seconds": 720,
-  "metadata_cached_seconds": 600,
-  "structure_cached_seconds": 3600
+  "metadata_cached_seconds": 768,
+  "structure_cached_seconds": 1200
 }
 ```
 
