@@ -19,7 +19,7 @@ Create a config file named `config.json`
   "token": "<secret>",
   "location_path": "/",
   "start_directory": "/",
-  "refresh_seconds": 300
+  "refresh_seconds": 720
 }
 ```
 
