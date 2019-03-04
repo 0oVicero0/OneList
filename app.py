@@ -22,7 +22,7 @@ def catch_all(path):
     info = od.list_items_with_cache(
         path_format(config.start_directory + '/' + path))
 
-    if info.files and not info.folders:  # download
+    if info.is_file:  # download
         return redirect(info.files[0]['download_url'])
 
     return render_template('list.html', info=info, path=path_format(path).strip('/'))
