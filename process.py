@@ -24,7 +24,7 @@ class Process:
         od.get_access(od.resource_id)
 
     @classmethod
-    def refresh_folders(cls):
+    def refresh_difference(cls):
         tasks = [{'full_path': config.start_directory}]
 
         while len(tasks) > 0:
@@ -69,8 +69,7 @@ class Process:
 
 
 Process.refresh_token()
-Process.refresh_folders()
 threading.Thread(target=Process.runner).start()
 
-schedule.every(3000).seconds.do(Process.refresh_token)
-schedule.every(config.refresh_seconds).seconds.do(Process.refresh_folders)
+schedule.every(config.refresh_seconds).seconds.do(Process.refresh_token)
+schedule.every(config.diff_seconds).seconds.do(Process.refresh_difference)
