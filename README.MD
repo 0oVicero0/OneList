@@ -3,6 +3,7 @@
 ## Installation
 
 ```bash
+# apt install python3-pip redis-server
 git clone https://github.com/0oVicero0/OneList.git
 cd OneList
 
