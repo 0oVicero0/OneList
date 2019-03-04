@@ -4,6 +4,7 @@
 
 from process import od
 from config import config
+from utils import path_format
 from flask import Flask, abort, redirect, render_template, Blueprint
 
 bp = Blueprint('main', __name__, url_prefix=config.location_path)
@@ -15,15 +16,16 @@ def favicon():
     return abort(404)
 
 
-@bp.route('/', defaults={'path': config.start_directory})
+@bp.route('/', defaults={'path': '/'})
 @bp.route('/<path:path>')
 def catch_all(path):
-    info = od.list_items_with_cache(path)
+    info = od.list_items_with_cache(
+        path_format(config.start_directory + '/' + path))
 
     if info.files and not info.folders:  # download
         return redirect(info.files[0]['download_url'])
 
-    return render_template('list.html', path=path, info=info)
+    return render_template('list.html', info=info, path=path_format(path).strip('/'))
 
 
 # Filters

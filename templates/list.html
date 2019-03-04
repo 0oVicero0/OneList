@@ -117,7 +117,7 @@
           <a href="javascript:back()" class="back-link">
             <ion-icon name="arrow-back"></ion-icon>
           </a>
-          <h3>{{ path }}</h3>
+          <h3>{{ path or '/' }}</h3>
         </div>
         <div class="list-body-container">
           <table class="list-table">
@@ -128,7 +128,7 @@
             </tr>
             <!-- Dirs -->
             {% for v in info.folders[1:] %}
-            <tr jump-to="{{ v.full_path }}">
+            <tr jump-to="{{ path }}/{{ v.name }}">
               <td class="file">
                 <ion-icon name="folder"></ion-icon> {{ v.name }}
               </td>
@@ -138,7 +138,7 @@
             {% endfor %}
             <!-- Files -->
             {% for v in info.files %}
-            <tr jump-to="{{ v.full_path }}">
+            <tr jump-to="{{ path }}/{{ v.name }}">
               <td class="file">
                 <ion-icon name="document"></ion-icon> {{ v.name }}
               </td>
@@ -155,8 +155,17 @@
     const root = "{{ url_for('.catch_all') }}"
 
     function back() {
-      location.href =
-        root + '{{ path }}'.replace('//', '/').replace(/\/$/, '') + '/../'
+      if (root != location.pathname) {
+        location.href = path_format(root + '{{ path }}/..')
+      }
+    }
+
+    function path_format(path) {
+      while (path.includes('//')) {
+        path = path.replace('//', '/')
+      }
+
+      return '/' + path.replace(/^\/|\/$/g, '')
     }
 
     document.querySelectorAll('.list-header-container h3').forEach(function(e) {
@@ -178,7 +187,7 @@
 
     document.querySelectorAll('[jump-to]').forEach(function(e) {
       e.addEventListener('click', function() {
-        location.href = (root + this.getAttribute('jump-to')).replace('//', '/')
+        location.href = path_format(root + this.getAttribute('jump-to'))
       })
     })
   </script>
