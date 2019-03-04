@@ -60,5 +60,5 @@ class Process:
 Process.refresh_token()
 threading.Thread(target=Process.runner).start()
 
-schedule.every(2).hours.do(Process.refresh_token)
+schedule.every(3000).seconds.do(Process.refresh_token)
 schedule.every(config.refresh_seconds).seconds.do(Process.refresh_folders)
