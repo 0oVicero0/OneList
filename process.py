@@ -31,6 +31,17 @@ class Process:
             c = tasks.pop(0)
             info = od.list_items_with_cache(c['full_path'], True)
 
+            for f in info.files:
+                p = f['full_path']
+
+                if not Cache.has(p):
+                    continue
+
+                file = Cache.get(p).files[0]
+                if file['hash'] != f['hash']:
+                    print('expired file: %s' % p)
+                    Cache.rem(p)
+
             for f in info.folders:
                 p = f['full_path']
 
@@ -44,7 +55,7 @@ class Process:
 
                 folder = Cache.get(p).folders[0]
                 if folder['hash'] != f['hash']:
-                    print('expired cache: %s' % p)
+                    print('expired folder: %s' % p)
                     new = od.list_items_with_cache(p, True)
 
                     cls.cache_all(new)
@@ -54,10 +65,11 @@ class Process:
     def cache_all(info):
         for f in info.folders:
             Cache.set(f['full_path'], od.list_items_with_cache(
-                f['full_path'], True))
+                f['full_path'], True), config.structure_cached_seconds)
 
 
 Process.refresh_token()
+Process.refresh_folders()
 threading.Thread(target=Process.runner).start()
 
 schedule.every(3000).seconds.do(Process.refresh_token)

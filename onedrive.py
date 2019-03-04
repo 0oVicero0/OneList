@@ -14,6 +14,7 @@ class _ItemInfo:
     def __init__(self):
         self.files = []
         self.folders = []
+        self.is_file = False
 
 
 class OneDrive():
@@ -47,7 +48,8 @@ class OneDrive():
             exit(1)
 
     def get_resource(self):
-        res = self._http_request('https://api.office.com/discovery/v2.0/me/services')
+        res = self._http_request(
+            'https://api.office.com/discovery/v2.0/me/services')
 
         for item in res['value']:
             if item['serviceApiVersion'] == 'v2.0':
@@ -69,6 +71,8 @@ class OneDrive():
             for children in res['children']:
                 self._append_item(info, children)
 
+        if info.files and not info.folders:
+            info.is_file = True
         return info
 
     def list_all_items(self, path='/'):
@@ -84,6 +88,8 @@ class OneDrive():
             ret.files += tmp.files
             ret.folders += tmp.folders[1:]
 
+        if ret.files and not ret.folders:
+            ret.is_file = True
         return ret
 
     def list_items_with_cache(self, path='/', flash=False):
@@ -95,7 +101,12 @@ class OneDrive():
                 Cache.set(key, self.list_items(path), 10)
             else:
                 print('missing: %s' % path)
-                Cache.set(key, self.list_items(path))
+
+                info = self.list_items(path)
+                if info.is_file:
+                    Cache.set(key, info, config.metadata_cached_seconds)
+                else:
+                    Cache.set(key, info, config.structure_cached_seconds)
 
         return Cache.get(key)
 
@@ -103,10 +114,10 @@ class OneDrive():
         headers = self._request_headers.copy()
         if self.access_token:
             headers['Authorization'] = "Bearer " + self.access_token
-        data = parse.urlencode(data).encode('utf-8')
 
-        result = request.urlopen(request.Request(url, method=method, data=data, headers=headers)).read().decode('utf-8')
-        res = json.loads(result)
+        data = parse.urlencode(data).encode('utf-8')
+        res = json.loads(request.urlopen(request.Request(
+            url, method=method, data=data, headers=headers)).read().decode('utf-8'))
 
         if 'error' in res:
             raise Exception(res['error']['message'])
