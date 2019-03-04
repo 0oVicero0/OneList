@@ -25,7 +25,7 @@ Create a config file named `config.json`
   "start_directory": "/",
   "refresh_seconds": 720,
   "metadata_cached_seconds": 768,
-  "structure_cached_seconds": 1200
+  "structure_cached_seconds": 840
 }
 ```
 
