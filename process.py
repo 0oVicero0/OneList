@@ -11,6 +11,8 @@ od = OneDrive()
 
 
 class Process:
+    tasks = []
+
     @staticmethod
     def runner():
         while True:
@@ -24,11 +26,17 @@ class Process:
         od.get_access(od.resource_id)
 
     @classmethod
-    def refresh_folders(cls):
-        tasks = [{'full_path': config.start_directory}]
+    def refresh_difference(cls):
+        cls.tasks.append({'full_path': config.start_directory})
 
-        while len(tasks) > 0:
-            c = tasks.pop(0)
+    @classmethod
+    def worker(cls):
+        while True:
+            if len(cls.tasks) < 1:
+                time.sleep(.1)
+                continue
+
+            c = cls.tasks.pop(0)
             info = od.list_items_with_cache(c['full_path'], True)
 
             for f in info.files:
@@ -50,7 +58,7 @@ class Process:
                     new = od.list_items_with_cache(p, True)
 
                     cls.cache_all(new)
-                    tasks += new.folders[1:]
+                    cls.tasks += new.folders[1:]
                     continue
 
                 folder = Cache.get(p).folders[0]
@@ -59,7 +67,7 @@ class Process:
                     new = od.list_items_with_cache(p, True)
 
                     cls.cache_all(new)
-                    tasks += new.folders[1:]
+                    cls.tasks += new.folders[1:]
 
     @staticmethod
     def cache_all(info):
@@ -69,8 +77,11 @@ class Process:
 
 
 Process.refresh_token()
-Process.refresh_folders()
-threading.Thread(target=Process.runner).start()
+Process.refresh_difference()
 
-schedule.every(3000).seconds.do(Process.refresh_token)
-schedule.every(config.refresh_seconds).seconds.do(Process.refresh_folders)
+schedule.every(config.refresh_seconds).seconds.do(Process.refresh_token)
+schedule.every(config.diff_seconds).seconds.do(Process.refresh_difference)
+
+threading.Thread(target=Process.runner).start()
+for _ in range(config.threads):
+    threading.Thread(target=Process.worker).start()

@@ -23,9 +23,10 @@ Create a config file named `config.json`
   "token": "<refresh_token>",
   "location_path": "/",
   "start_directory": "/",
-  "refresh_seconds": 720,
-  "metadata_cached_seconds": 768,
-  "structure_cached_seconds": 840
+  "diff_seconds": 300,
+  "refresh_seconds": 500,
+  "metadata_cached_seconds": 600,
+  "structure_cached_seconds": 1800
 }
 ```
 
