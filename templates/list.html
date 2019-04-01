@@ -156,7 +156,7 @@
 
     function back() {
       if (root != location.pathname) {
-        location.href = path_format(root + '{{ path }}/..')
+        window.location.href = location.protocol + "//" + location.hostname + location.pathname.substr(0,location.pathname.lastIndexOf('/'));
       }
     }
 
