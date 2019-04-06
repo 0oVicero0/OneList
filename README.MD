@@ -10,7 +10,7 @@ cd OneList
 
 pip3 install -r requirements.txt
 # Get refresh_token --> Setup config
-# The <refresh_token> does not need "<" and ">".
+# The <refresh_token> in config.json does not need "<" and ">".
 
 gunicorn app:app -b 127.0.0.1:5000 -D
 ```
