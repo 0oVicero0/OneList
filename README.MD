@@ -9,7 +9,8 @@ git clone https://github.com/0oVicero0/OneList.git
 cd OneList
 
 pip3 install -r requirements.txt
-# Get auth_token --> Get refresh_token --> Setup config
+# Get refresh_token --> Setup config
+# The <refresh_token> does not need "<" and ">".
 
 gunicorn app:app -b 127.0.0.1:5000 -D
 ```
