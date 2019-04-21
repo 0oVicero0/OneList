@@ -27,13 +27,14 @@ class OneDrive():
 
         self.expires_on = ''
         self.access_token = ''
+        self.redirect_uri = 'http://localhost/onedrive-login'
         self.refresh_token = config.token
 
     def get_access(self, resource='https://api.office.com/discovery/'):
         res = self._http_request('https://login.microsoftonline.com/common/oauth2/token', method='POST', data={
             'client_id': 'ea2b36f6-b8ad-40be-bc0f-e5e4a4a7d4fa',
             'client_secret': 'h27zG8pr8BNsLU0JbBh5AOznNS5Of5Y540l/koc7048=',
-            'redirect_uri': 'http://localhost/onedrive-login',
+            'redirect_uri': self.redirect_uri,
             'refresh_token': self.refresh_token,
             'grant_type': 'refresh_token',
             'resource': resource
