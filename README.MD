@@ -22,7 +22,7 @@ Create a config file named `config.json`
 ```json
 {
   "token": "<refresh_token>",
-  "redirect_uri": "http://localhost/onedrive-login"
+  "redirect_uri": "http://localhost/onedrive-login",
   "location_path": "/",
   "start_directory": "/",
   "threads": 3,
