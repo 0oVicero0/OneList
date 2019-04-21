@@ -4,7 +4,7 @@ import json
 import pickle
 import hashlib
 
-from cache import Cache
+from dcache import Cache
 from utils import path_format
 from config import config
 from urllib import request, parse
@@ -114,7 +114,10 @@ class OneDrive():
         headers = self._request_headers.copy()
         if self.access_token:
             headers['Authorization'] = "Bearer " + self.access_token
-
+        print(url)
+        print(data)
+        print(method)
+        print(self.access_token)
         data = parse.urlencode(data).encode('utf-8')
         res = json.loads(request.urlopen(request.Request(
             url, method=method, data=data, headers=headers)).read().decode('utf-8'))
