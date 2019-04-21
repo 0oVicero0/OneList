@@ -1,5 +1,7 @@
 # OneList
 
+本版本不需要使用Redis!
+
 ## Installation
 
 ```bash
