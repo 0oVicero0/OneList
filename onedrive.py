@@ -30,8 +30,8 @@ class OneDrive():
         self.refresh_token = config.token
         
         try:
-            self.refresh_token = config.redirect_uri
-            assert '://' in self.refresh_token
+            self.redirect_uri = config.redirect_uri
+            assert '://' in self.redirect_uri
         except:
             self.redirect_uri = 'http://localhost/onedrive-login'
 
