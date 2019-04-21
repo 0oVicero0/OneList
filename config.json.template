@@ -1,0 +1,12 @@
+{
+  "token":"<refresh_token>",
+  "location_path": "/",
+  "start_directory": "/",
+  "threads": 3,
+  "diff_seconds": 480,
+  "refresh_seconds": 720,
+  "metadata_cached_seconds": 768,
+  "structure_cached_seconds": 840
+}
+
+
