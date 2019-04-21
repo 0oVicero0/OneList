@@ -37,7 +37,7 @@ Create a config file named `config.json`
 ### Method 1 (Auto, Recommend): 
 #### Modify `config.json` item
 ```
-"redirect_uri": "https://api.moeclub.org/onedrive-login"
+"redirect_uri": "https://api.moeclub.org/onedrive-login",
 ```
 
 #### Get refresh_token
