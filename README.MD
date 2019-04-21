@@ -22,7 +22,6 @@ Create a config file named `config.json`
 ```json
 {
   "token": "<refresh_token>",
-  "redirect_uri": "",
   "location_path": "/",
   "start_directory": "/",
   "threads": 3,
@@ -35,11 +34,6 @@ Create a config file named `config.json`
 ## Get refresh_token
 
 ### Method 1 (Auto, Recommend): 
-#### Modify `config.json` item
-```
-"redirect_uri": "https://api.moeclub.org/onedrive-login",
-```
-
 #### Get refresh_token
 
 > https://login.microsoftonline.com/common/oauth2/authorize?response_type=code&client_id=ea2b36f6-b8ad-40be-bc0f-e5e4a4a7d4fa&redirect_uri=https://api.moeclub.org/onedrive-login
