@@ -114,9 +114,11 @@
     <div class="list-wrapper">
       <div class="list-container">
         <div class="list-header-container">
-          <a href="javascript:back()" class="back-link">
-            <ion-icon name="arrow-back"></ion-icon>
-          </a>
+          {% if path%}
+            <a href="javascript:back()" class="back-link">
+              <ion-icon name="arrow-back"></ion-icon>
+            </a>
+          {% endif %}
           <h3>{{ path or '/' }}</h3>
         </div>
         <div class="list-body-container">
