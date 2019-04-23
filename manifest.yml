@@ -1,0 +1,4 @@
+---
+applications:
+- name: ruyonet
+command: python app.py
