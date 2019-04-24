@@ -2,92 +2,112 @@
 # -*- encoding: utf-8 -*-
 # Author:  MoeClub.org
 
+# Fake Redis, Cache in memory.
+# Support type: bytes, int, str, list, dict
+
 from threading import Thread
 import base64
+import pickle
 import time
 
 
 class Cache:
     def __init__(self, interval=1):
-        self.cache = {}
-        self.interval = int(interval)
-        self.valid()
+        self._interval_time = int(interval)
+        self._cache = {}
+        self._valid()
 
-    def get_time(self, interval=None, sleep_time=False):
-        if sleep_time:
-            try:
-                assert interval
-                interval = int(interval)
-            except:
-                interval = self.interval
-            time.sleep(interval)
+    def _time(self):
         return int(time.time())
+
+    def _interval(self, interval=None):
+        try:
+            assert interval
+            interval = int(interval)
+        except:
+            interval = self._interval_time
+        time.sleep(interval)
 
     def get(self, item, obj='value'):
         try:
             assert isinstance(item, str)
-            assert item and item in self.cache
-            return base64.b64decode(str(self.cache[item][obj]).encode('utf-8'))
-        except:
+            assert item and item in self._cache
+            if obj == 'value':
+                value = base64.b64decode(str(self._cache[item][obj]).encode('utf-8'))
+                if not self._cache[item]['bytes']:
+                    value = pickle.loads(value)
+            else:
+                value = self._cache[item][obj]
+            return value
+        except Exception as error:
+            print(error)
             return None
 
     def exists(self, item):
         try:
             assert isinstance(item, str)
-            assert item and item in self.cache
+            assert item and item in self._cache
             return 1
         except:
             return 0
 
-    def set(self, item, item_value, expire, refresh=True):
+    def set(self, item, item_value, expire=7, refresh=True):
         try:
-            if refresh and item in self.cache:
+            if refresh and item in self._cache:
                 self.delete(item)
-            self.cache[item] = {}
-            self.cache[item]['value'] = base64.b64encode(item_value).decode('utf-8')
-            self.cache[item]['time'] = str(int(self.get_time()) + int(expire))
+            self._cache[item] = {}
+            if not isinstance(item_value, bytes):
+                self._cache[item]['bytes'] = 0
+                item_value = pickle.dumps(item_value)
+            else:
+                self._cache[item]['bytes'] = 1
+            self._cache[item]['value'] = base64.b64encode(item_value).decode('utf-8')
+            self._cache[item]['ttl'] = str(9999999999) if expire == 0 else str(int(self._time()) + int(expire))
             return "OK"
-        except:
+        except Exception as error:
+            print(error)
             return 0
 
     def delete(self, item):
         try:
             if isinstance(item, dict):
                 for item_cache in item:
-                    assert item_cache and item_cache in self.cache
-                    self.cache.pop(item_cache)
+                    assert item_cache and item_cache in self._cache
+                    self._cache.pop(item_cache)
             elif isinstance(item, str):
-                assert item and item in self.cache
-                self.cache.pop(item)
+                assert item and item in self._cache
+                self._cache.pop(item)
             else:
                 raise Exception
         except:
             return False
 
     def flush(self):
-        self.cache = {}
+        self._cache = {}
 
-    def cache_ttl(self):
+    def _ttl(self):
         while True:
             try:
-                Time_Now = self.get_time(sleep_time=True)
-                for item in self.cache:
+                Now = self._time()
+                for item in self._cache:
                     try:
-                        if int(self.cache[item]['time']) > Time_Now:
+                        if int(self._cache[item]['ttl']) - int(self._interval_time) < Now:
                             self.delete(item)
                     except:
-                        continue
+                        break
+                self._interval()
             except:
                 continue
 
-    def valid(self):
-        Loop = Thread(target=self.cache_ttl)
-        Loop.setDaemon(True)
-        Loop.start()
+    def _valid(self):
+        Task = Thread(target=self._ttl)
+        Task.setDaemon(True)
+        Task.start()
 
 
 if __name__ == '__main__':
     c = Cache()
-    c.set('item', 'value', 32)
-    print(c.cache)
+    c.set('item', 0)
+    print(c.get('item'))
+
 
