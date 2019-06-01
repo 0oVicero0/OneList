@@ -106,7 +106,7 @@ class OneDrive():
             if flash:
                 Cache.set(key, self.list_items(path), 10)
             else:
-                print('missing: %s' % path)
+                print('missing: %s' % path.encode('utf-8'))
 
                 info = self.list_items(path)
                 if info.is_file:
